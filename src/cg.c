@@ -2,22 +2,15 @@
 #include "../headers/data.h"
 #include "../headers/decl.h"
 
-// Code generator for x86-64 nasm
-// Copyright (c) 2019 Warren Toomey, GPL3
-
-
-// List of available registers
-// and their names
 static int freereg[4];
 static char *reglist[4] = { "r8", "r9", "r10", "r11" };
 
-// Set all registers as available
+
 void freeall_registers(void) {
   freereg[0] = freereg[1] = freereg[2] = freereg[3] = 1;
 }
 
-// Allocate a free register. Return the number of
-// the register. Die if no available registers.
+
 static int alloc_register(void) {
   for (int i = 0; i < 4; i++) {
     if (freereg[i]) {
@@ -29,8 +22,7 @@ static int alloc_register(void) {
   exit(1);
 }
 
-// Return a register to the list of available registers.
-// Check to see if it's not already there.
+
 static void free_register(int reg) {
   if (freereg[reg] != 0) {
     fprintf(stderr, "Error trying to free register %d\n", reg);
@@ -39,7 +31,7 @@ static void free_register(int reg) {
   freereg[reg] = 1;
 }
 
-// Print out the assembly preamble
+
 void cgpreamble() {
   freeall_registers();
   fputs("\tglobal\tmain\n"
@@ -63,49 +55,42 @@ void cgpreamble() {
 	"main:\n" "\tpush\trbp\n" "\tmov	rbp, rsp\n", Outfile);
 }
 
-// Print out the assembly postamble
+
 void cgpostamble() {
   fputs("\tmov	eax, 0\n" "\tpop	rbp\n" "\tret\n", Outfile);
 }
 
-// Load an integer literal value into a register.
-// Return the number of the register
-int cgload(int value) {
 
-  // Get a new register
+
+int cgload(int value) {
   int r = alloc_register();
 
-  // Print out the code to initialise it
   fprintf(Outfile, "\tmov\t%s, %d\n", reglist[r], value);
   return (r);
 }
 
-// Add two registers together and return
-// the number of the register with the result
+
 int cgadd(int r1, int r2) {
   fprintf(Outfile, "\tadd\t%s, %s\n", reglist[r2], reglist[r1]);
   free_register(r1);
   return (r2);
 }
 
-// Subtract the second register from the first and
-// return the number of the register with the result
+
 int cgsub(int r1, int r2) {
   fprintf(Outfile, "\tsub\t%s, %s\n", reglist[r1], reglist[r2]);
   free_register(r2);
   return (r1);
 }
 
-// Multiply two registers together and return
-// the number of the register with the result
+
 int cgmul(int r1, int r2) {
   fprintf(Outfile, "\timul\t%s, %s\n", reglist[r2], reglist[r1]);
   free_register(r1);
   return (r2);
 }
 
-// Divide the first register by the second and
-// return the number of the register with the result
+
 int cgdiv(int r1, int r2) {
   fprintf(Outfile, "\tmov\trax, %s\n", reglist[r1]);
   fprintf(Outfile, "\tcqo\n");
@@ -115,9 +100,36 @@ int cgdiv(int r1, int r2) {
   return (r1);
 }
 
-// Call printint() with the given register
+
 void cgprintint(int r) {
   fprintf(Outfile, "\tmov\trdi, %s\n", reglist[r]);
   fprintf(Outfile, "\tcall\tprintint\n");
   free_register(r);
+}
+
+int cgloadint(int value) {
+  int r = alloc_register();
+
+  fprintf(Outfile, "\tmov\t%s, %d\n", reglist[r], value);
+  return (r);
+}
+
+int cgloadglob(char *identifier) {
+  int r = alloc_register();
+
+  fprintf(Outfile, "\tmov\t%s, [%s]\n", reglist[r], identifier);
+  return (r);
+}
+
+int cgstorglob(int r, char *identifier) {
+  fprintf(Outfile, "\tmov\t[%s], %s\n", identifier, reglist[r]);
+  return (r);
+}
+
+void cgglobsym(char *sym) {
+  fprintf(Outfile, "\tcommon\t%s 8:8\n", sym);
+}
+
+void genglobsym(char *s) {
+  cgglobsym(s);
 }

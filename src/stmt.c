@@ -2,37 +2,59 @@
 #include "../headers/data.h"
 #include "../headers/decl.h"
 
-// Parsing of statements
-// Copyright (c) 2019 Warren Toomey, GPL3
+void assignment_statement() {
+    struct ASTnode *left, *right, *tree;
+    int id;
 
-// statements: statement
-//      | statement statements
-//      ;
-//
-// statement: 'print' expression ';'
-//      ;
+    ident();
+    
+    if ((id = findglob(Text)) == -1) {
+      fatals("Undeclared Variable", Text);
+    }
+    right = mkastleaf(A_LVIDENT, id);
+    
+    match(T_EQUALS, "=");
 
+    left = binexpr(0);
+    
+    tree = mkastnode(A_ASSIGN, left, right, 0);
 
-// Parse one or more statements
-void statements(void) {
+    genAST(tree, -1);
+    genfreeregs();
+    
+    semi();
+}
+
+void print_statement(void) {
   struct ASTnode *tree;
   int reg;
 
+  match(T_PRINT, "print");
+
+  tree = binexpr(0);
+  reg = genAST(tree, -1);
+  genprintint(reg);
+  genfreeregs();
+
+  semi();
+}
+
+void statements(void) {
   while (1) {
-    // Match a 'print' as the first token
-    match(T_PRINT, "print");
-
-    // Parse the following expression and
-    // generate the assembly code
-    tree = binexpr(0);
-    reg = genAST(tree);
-    genprintint(reg);
-    genfreeregs();
-
-    // Match the following semicolon
-    // and stop if we are at EOF
-    semi();
-    if (Token.token == T_EOF)
-      return;
+    switch (Token.token) {
+      case T_PRINT:
+        print_statement();
+        break;
+      case T_INT:
+        var_declaration();
+        break;
+      case T_IDENT:
+        assignment_statement();
+        break;
+      case T_EOF:
+        return;
+      default:
+        fatald("Syntax error, token", Token.token);
+    }
   }
 }

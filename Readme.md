@@ -1,12 +1,14 @@
-# XESE
+# Prose
 
 ## Dependencies
-Ubuntu 20.04:  
 ```bash
-  todo
+sudo apt update
+sudo apt install make build-essential nasm
 ```
 
 ## Building and Installing
 ```bash
-  todo
+git clone https://github.com/jvmespark/prose.git
+cd prose
+make test
 ```
