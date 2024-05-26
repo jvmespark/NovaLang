@@ -26,23 +26,18 @@ static struct ASTnode *primary(void) {
 
 
 static int arithop(int tokentype) {
-  switch (tokentype) {
-    case T_PLUS:
-      return (A_ADD);
-    case T_MINUS:
-      return (A_SUBTRACT);
-    case T_STAR:
-      return (A_MULTIPLY);
-    case T_SLASH:
-      return (A_DIVIDE);
-    default:
-      fprintf(stderr, "syntax error on line %d, token %d\n", Line, tokentype);
-      exit(1);
-  }
+  if (tokentype > T_EOF && tokentype < T_INTLIT)
+    return tokentype;
+  fatald("Syntax error, token", tokentype);
 }
 
 
-static int OpPrec[] = { 0, 10, 10, 20, 20, 0 };
+static int OpPrec[] = { 
+  0, 10, 10,      // T_EOF, T_PLUS, T_MINUS
+  20, 20,         // T_STAR, T_SLASH
+  30, 30,         // T_EQ, T_NE
+  40, 40, 40, 40  // T_LT, T_GT, T_LE, T_GE
+};
 
 
 

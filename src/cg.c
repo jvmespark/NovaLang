@@ -2,8 +2,11 @@
 #include "../headers/data.h"
 #include "../headers/decl.h"
 
+// x86_64 code generator for NASM
+
 static int freereg[4];
 static char *reglist[4] = { "r8", "r9", "r10", "r11" };
+static char *breglist[4] = { "r8b", "r9b", "r10b", "r11b" };
 
 
 void freeall_registers(void) {
@@ -133,3 +136,18 @@ void cgglobsym(char *sym) {
 void genglobsym(char *s) {
   cgglobsym(s);
 }
+
+static int cgcompare(int r1, int r2, char *how) {
+  fprintf(Outfile, "\tcmp\t%s, %s\n", reglist[r1], reglist[r2]);
+  fprintf(Outfile, "\t%s\t%s\n", how, breglist[r2]);
+  fprintf(Outfile, "\tand\t%s, 255\n", reglist[r2]);
+  free_register(r1);
+  return (r2);
+}
+
+int cgequal(int r1, int r2) { return(cgcompare(r1, r2, "sete")); }
+int cgnotequal(int r1, int r2) { return(cgcompare(r1, r2, "setne")); }
+int cglessthan(int r1, int r2) { return(cgcompare(r1, r2, "setl")); }
+int cggreaterthan(int r1, int r2) { return(cgcompare(r1, r2, "setg")); }
+int cglessequal(int r1, int r2) { return(cgcompare(r1, r2, "setle")); }
+int cggreaterequal(int r1, int r2) { return(cgcompare(r1, r2, "setge")); }

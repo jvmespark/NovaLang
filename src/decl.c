@@ -9,5 +9,3 @@ void var_declaration() {
     genglobsym(Text);
     semi();
 }
-
-

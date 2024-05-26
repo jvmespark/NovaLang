@@ -25,7 +25,6 @@ static int next(void) {
   return (c);
 }
 
-
 static void putback(int c) {
   Putback = c;
 }
@@ -118,30 +117,65 @@ int scan(struct token *t) {
       t->token = T_SEMI;
       break;
     case '=':
-      t->token = T_EQUALS;
+      c = next();
+      if (c == '=') {
+        t->token = T_EQ;
+      }
+      else {
+        putback(c);
+        t->token = T_ASSIGN;
+      }
+      break;
+    case '!':
+      c = next();
+      if (c == '=') {
+        t->token = T_NE;
+      }
+      else {
+        fatalc("Unrecognized character", c);
+      }
+      break;
+    case '<':
+      c = next();
+      if (c == '=') {
+        t->token = T_LE;
+      }
+      else {
+        putback(c);
+        t->token = T_LT;
+      }
+      break;
+    case '>':
+      c = next();
+      if (c == '=') {
+        t->token = T_GE;
+      }
+      else {
+        putback(c);
+        t->token = T_GT;
+      }
       break;
     default:
+      if (isdigit(c)) {
+        t->intvalue = scanint(c);
+        t->token = T_INTLIT;
+        break;
+      } 
+      else if (isalpha(c) || '_' == c) {
+        scanident(c, Text, TEXTLEN);
 
-  if (isdigit(c)) {
-    t->intvalue = scanint(c);
-    t->token = T_INTLIT;
-    break;
-  } 
-  else if (isalpha(c) || '_' == c) {
-    scanident(c, Text, TEXTLEN);
+        if (tokentype = keyword(Text)) {
+          t->token = tokentype;
+          break;
+        }
 
-    if (tokentype = keyword(Text)) {
-      t->token = tokentype;
-      break;
-    }
-
-    // not a keyword, set it as an identifier
-    t->token = T_IDENT;
-    break;
-  }
-  
-  printf("Unrecognised character %c on line %d\n", c, Line);
-  exit(1);
+        // not a keyword, set it as an identifier
+        t->token = T_IDENT;
+        break;
+      }
+      
+      printf("Unrecognised character %c on line %d\n", c, Line);
+      exit(1);
   }
 
   return (1);
