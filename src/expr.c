@@ -43,10 +43,8 @@ static int OpPrec[] = {
 
 static int op_precedence(int tokentype) {
   int prec = OpPrec[tokentype];
-  if (prec == 0) {
-    fprintf(stderr, "syntax error on line %d, token %d\n", Line, tokentype);
-    exit(1);
-  }
+  if (prec == 0)
+    fatald("Syntax error, token", tokentype);
   return (prec);
 }
 
@@ -59,15 +57,15 @@ struct ASTnode *binexpr(int ptp) {
   left = primary();
   tokentype = Token.token;
 
-  if (tokentype == T_SEMI)
+  if (tokentype == T_SEMI || tokentype == T_RPAREN)
     return (left);
 
   while (op_precedence(tokentype) > ptp) {
     scan(&Token);
     right = binexpr(OpPrec[tokentype]);    
-    left = mkastnode(arithop(tokentype), left, right, 0);
+    left = mkastnode(arithop(tokentype), left, NULL, right, 0);
     tokentype = Token.token;
-    if (tokentype == T_SEMI)
+    if (tokentype == T_SEMI || tokentype == T_RPAREN)
       return (left);
   }
 

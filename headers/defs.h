@@ -13,7 +13,8 @@ enum {
   T_EQ, T_NE,
   T_LT, T_GT, T_LE, T_GE,
   T_INTLIT, T_SEMI, T_ASSIGN, T_IDENT,
-  T_PRINT, T_INT
+  T_LBRACE, T_RBRACE, T_LPAREN, T_RPAREN,
+  T_PRINT, T_INT, T_IF, T_ELSE
 };
 
 
@@ -28,13 +29,15 @@ enum {
   A_EQ, A_NE,
   A_LT, A_GT, A_LE, A_GE,
   A_INTLIT,
-  A_LVIDENT, A_ASSIGN, A_IDENT, 
+  A_LVIDENT, A_ASSIGN, A_IDENT, A_PRINT, 
+  A_GLUE, A_IF
 };
 
 
 struct ASTnode {
   int op;			
   struct ASTnode *left;		
+  struct ASTnode *mid;
   struct ASTnode *right;
   union {
     int intvalue;
@@ -42,6 +45,7 @@ struct ASTnode {
   } v;	
 };
 
+#define NOREG   -1 // when there is no registers to return in AST generation
 
 struct symTable {
   char *name;
