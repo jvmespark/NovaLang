@@ -20,23 +20,21 @@ main:
 	push	rbp
 	mov	rbp, rsp
 	common	i 8:8
-	common	j 8:8
-	mov	r8, 6
+	mov	r8, 1
 	mov	[i], r8
-	mov	r8, 12
-	mov	[j], r8
-	mov	r8, [i]
-	mov	r9, [j]
-	cmp	r8, r9
-	jge	L1
-	mov	r8, [i]
-	mov	rdi, r8
-	call	printint
-	jmp	L2
 L1:
-	mov	r8, [j]
+	mov	r8, [i]
+	mov	r9, 10
+	cmp	r8, r9
+	jg	L2
+	mov	r8, [i]
 	mov	rdi, r8
 	call	printint
+	mov	r8, [i]
+	mov	r9, 1
+	add	r9, r8
+	mov	[i], r9
+	jmp	L1
 L2:
 	mov	eax, 0
 	pop	rbp

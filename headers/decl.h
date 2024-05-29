@@ -12,6 +12,7 @@ struct ASTnode *mkastunary(int op, struct ASTnode *left, int intvalue);
 static int label(void);
 static int genIFAST(struct ASTnode *n);
 int genAST(struct ASTnode *n, int reg, int parentASTop);
+static int genWHILE(struct ASTnode *n);
 void genpreamble();
 void genpostamble();
 void genfreeregs();
